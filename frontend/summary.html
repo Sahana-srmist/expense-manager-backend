@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Summary & Export</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<div id="navbar"></div>
+
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(data => document.getElementById("navbar").innerHTML = data);
+</script>
+
+<body>
+  <div id="navbar"></div>
+
+  <h1>Expense Summary</h1>
+
+  <div class="form">
+    <button onclick="getSummary()">Show Summary</button>
+
+    <h3>Monthly Summary</h3>
+    <input type="number" id="month" placeholder="Month (1-12)">
+    <input type="number" id="year" placeholder="Year (e.g., 2025)">
+    <button onclick="getMonthlySummary()">View</button>
+
+    <br><br>
+    <button onclick="downloadCSV()">Download CSV</button>
+    <button onclick="downloadChart()">Download Bar Chart</button>
+  </div>
+
+  <div id="output"></div>
+
+  <br><button onclick="logout()">Logout</button>
+
+  <script src="script.js"></script>
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(html => document.getElementById("navbar").innerHTML = html);
+</script>
+
+</body>
+</html>

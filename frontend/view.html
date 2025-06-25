@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Expenses</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<div id="navbar"></div>
+
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(data => document.getElementById("navbar").innerHTML = data);
+</script>
+
+<body>
+  <div id="navbar"></div>
+
+  <h1>My Expenses</h1>
+
+  <div class="form">
+    <button onclick="getAllExpenses()">View All Expenses</button>
+    
+    <h3>Search by Reason</h3>
+    <input type="text" id="search-reason" placeholder="Reason">
+    <button onclick="searchByReason()">Search</button>
+
+    <h3>Search by Date</h3>
+    <input type="text" id="search-date" placeholder="DD-MM-YYYY">
+    <button onclick="searchByDate()">Search</button>
+  </div>
+
+  <div id="output"></div>
+
+  <br><button onclick="logout()">Logout</button>
+
+  <script src="script.js"></script>
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(html => document.getElementById("navbar").innerHTML = html);
+</script>
+
+</body>
+</html>

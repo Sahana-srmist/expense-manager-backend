@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Expense</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<div id="navbar"></div>
+
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(data => document.getElementById("navbar").innerHTML = data);
+</script>
+
+<body>
+  <div id="navbar"></div>
+
+  <h1>Add Expense</h1>
+
+  <div class="form">
+    <input type="text" id="reason" placeholder="Reason">
+    <input type="number" id="amount" placeholder="Amount (₹)">
+    <input type="text" id="date" placeholder="Date (DD-MM-YYYY)">
+    <button onclick="addExpense()">Add Expense</button>
+  </div>
+
+  <br>
+  <button onclick="logout()">Logout</button>
+
+  <script src="script.js"></script>
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(html => document.getElementById("navbar").innerHTML = html);
+</script>
+
+</body>
+</html>

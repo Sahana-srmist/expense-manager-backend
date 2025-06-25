@@ -3,10 +3,11 @@ from datetime import date as DateType
 from typing import Any
 
 class ExpenseIn(BaseModel):
-    username: str
     reason: str
     amount: float
-    date: str  # User inputs as DD-MM-YYYY
+    date: str  # Let it be 'YYYY-MM-DD'
+
+
 
 class ExpenseOut(BaseModel):
     sno: int

@@ -14,14 +14,22 @@ from datetime import datetime #converting to DD-MM-YYYY format
 import bcrypt #password hashing
 from fastapi.responses import FileResponse 
 import matplotlib.pyplot as plt #bar chart
+from fastapi.middleware.cors import CORSMiddleware
 
 security = HTTPBasic()
-
 
 app = FastAPI(
     title="EXPENSE MANAGER",          # appears in swagger UI
     description="Track and manage expenses with user authentication.",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
@@ -84,10 +92,13 @@ def login(current_user: str = Depends(get_current_user)):
 @app.post("/add", response_model=dict)
 def add_expense(expense: ExpenseIn, current_user: str = Depends(get_current_user)):
     # Convert DD-MM-YYYY to datetime.date
+    # Convert ISO (YYYY-MM-DD) string to datetime.date
     try:
-        date_obj = datetime.strptime(expense.date, "%d-%m-%Y").date()
+        print("Received date:", expense.date)
+        date_obj = datetime.strptime(expense.date, "%Y-%m-%d").date()
     except ValueError:
-        raise HTTPException(status_code=400, detail="Date format must be DD-MM-YYYY")
+        raise HTTPException(status_code=400, detail="Date format must be YYYY-MM-DD")
+
 
     conn = get_db_connection()
     cur = conn.cursor()
@@ -116,6 +127,7 @@ def add_expense(expense: ExpenseIn, current_user: str = Depends(get_current_user
         }
     except Exception as e:
         conn.rollback()
+        print("ADD ERROR:", e)  # ADD THIS
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
