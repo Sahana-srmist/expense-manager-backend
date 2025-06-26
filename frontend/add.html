@@ -1,38 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
   <title>Add Expense</title>
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .form-container {
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 400px;
+      margin: 80px auto;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    input {
+      width: 90%;
+      margin: 12px auto;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      display: block;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      background-color: #795548;
+      color: white;
+      width: 90%;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #5d4037;
+    }
+
+    .back-btn {
+      background-color: #616161;
+      margin-top: 10px;
+    }
+
+    .back-btn:hover {
+      background-color: #424242;
+    }
+  </style>
 </head>
-<div id="navbar"></div>
-
-<script>
-  fetch("navbar.html")
-    .then(res => res.text())
-    .then(data => document.getElementById("navbar").innerHTML = data);
-</script>
-
 <body>
+
   <div id="navbar"></div>
 
-  <h1>Add Expense</h1>
-
-  <div class="form">
-    <input type="text" id="reason" placeholder="Reason">
-    <input type="number" id="amount" placeholder="Amount (₹)">
-    <input type="text" id="date" placeholder="Date (DD-MM-YYYY)">
-    <button onclick="addExpense()">Add Expense</button>
+  <div class="form-container">
+    <h2 style="color: #242424;">Add Expense</h2>
+    <input type="text" id="reason" placeholder="Reason" />
+    <input type="number" id="amount" placeholder="Amount" />
+    <input type="date" id="date" />
+    <button onclick="addExpense()">Submit</button>
+    <button class="back-btn" onclick="location.href='dashboard.html'">Back to Dashboard</button>
   </div>
 
-  <br>
-  <button onclick="logout()">Logout</button>
-
   <script src="script.js"></script>
-<script>
-  fetch("navbar.html")
-    .then(res => res.text())
-    .then(html => document.getElementById("navbar").innerHTML = html);
-</script>
+  <script>
+    // 🔐 Redirect to login if not logged in
+    const isLoggedIn = localStorage.getItem("username");
+    if (!isLoggedIn) {
+      location.href = "login.html";
+    }
 
+    // ✅ Load navbar after script.js
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar").innerHTML = html;
+
+        // Wait for DOM update, then adjust navbar
+        const interval = setInterval(() => {
+          const authBtn = document.getElementById("auth-button");
+          if (authBtn && typeof updateNavbar === "function") {
+            updateNavbar("app"); // show only logout
+            clearInterval(interval);
+          }
+        }, 50);
+      });
+  </script>
 </body>
 </html>

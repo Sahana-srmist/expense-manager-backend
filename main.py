@@ -177,11 +177,11 @@ def search_by_reason(reason: str, current_user: str = Depends(get_current_user))
 
 @app.get("/search/date", response_model=List[ExpenseOut])
 def search_by_date(date: str, current_user: str = Depends(get_current_user)):
-    # Validate date format
     try:
-        search_date = datetime.strptime(date, "%d-%m-%Y").date()
+        # Parse the correct format: YYYY-MM-DD
+        search_date = datetime.strptime(date, "%Y-%m-%d").date()
     except ValueError:
-        raise HTTPException(status_code=400, detail="Date format should be DD-MM-YYYY")
+        raise HTTPException(status_code=400, detail="Date format should be YYYY-MM-DD")
 
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -201,7 +201,6 @@ def search_by_date(date: str, current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="No expenses found on this date.")
 
     return [ExpenseOut(**dict(row)) for row in rows]
-
 
 @app.delete("/delete/", response_model=dict)
 def delete_by_reason(reason: str, current_user: str = Depends(get_current_user)):
@@ -223,7 +222,11 @@ def get_summary(current_user: str = Depends(get_current_user)):
     cur = conn.cursor()
     try:
         cur.execute(
-            "SELECT amount FROM expenses WHERE LOWER(username) = LOWER(%s)",
+            """
+            SELECT amount, date
+            FROM expenses
+            WHERE LOWER(username) = LOWER(%s)
+            """,
             (current_user,)
         )
         rows = cur.fetchall()
@@ -237,12 +240,18 @@ def get_summary(current_user: str = Depends(get_current_user)):
         highest = max(amounts)
         lowest = min(amounts)
 
+        # Find the dates for highest and lowest
+        highest_date = next(row[1] for row in rows if row[0] == highest)
+        lowest_date = next(row[1] for row in rows if row[0] == lowest)
+
         return {
             "username": current_user,
             "total_expense": round(total, 2),
             "average_expense": round(average, 2),
             "highest_expense": round(highest, 2),
+            "highest_date": highest_date.strftime("%d-%m-%Y"),
             "lowest_expense": round(lowest, 2),
+            "lowest_date": lowest_date.strftime("%d-%m-%Y"),
             "records": len(amounts)
         }
     except Exception as e:
@@ -250,6 +259,7 @@ def get_summary(current_user: str = Depends(get_current_user)):
     finally:
         cur.close()
         conn.close()
+
 
 
 @app.get("/summary/monthly", response_model=dict)

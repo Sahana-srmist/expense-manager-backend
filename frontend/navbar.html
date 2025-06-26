@@ -1,37 +1,8 @@
-<div class="navbar">
+<div class="navbar">  
   <div class="nav-left">
-    <span style="color: white; font-weight: bold; font-size: 18px;">EXPENSE MANAGER</span>
+    <span class="brand">EXPENSE MANAGER</span>
   </div>
   <div class="nav-right">
-    <a href="register.html">Register</a>
-    <a href="#" id="auth-button" onclick="handleAuth()"></a>
+    <a href="#" id="auth-button" onclick="handleAuth()">Login</a>
   </div>
 </div>
-
-<script>
-  function updateAuthButton() {
-    const btn = document.getElementById("auth-button");
-    const username = localStorage.getItem("username");
-
-    if (username) {
-      btn.textContent = "Logout";
-    } else {
-      btn.textContent = "Login";
-    }
-  }
-
-  function handleAuth() {
-    const username = localStorage.getItem("username");
-    if (username) {
-      // Logout
-      localStorage.clear();
-      alert("You have been logged out.");
-      location.href = "login.html";
-    } else {
-      // Go to login
-      location.href = "login.html";
-    }
-  }
-
-  updateAuthButton();
-</script>

@@ -1,34 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Expense Manager - Login/Register</title>
+  <meta charset="UTF-8" />
+  <title>Expense Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background-image: url("https://c1.wallpaperflare.com/preview/830/150/561/sackcloth-sackcloth-textured-laptop-ipad.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: brightness(0.9);
+    }
+
+    h1 {
+      font-size: 52px;
+      margin-bottom: 12px;
+      font-weight: 600;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    p {
+      font-size: 20px;
+      margin-bottom: 50px;
+      font-weight: 400;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn {
+      background-color: rgba(255, 255, 255, 0.85);
+      border: none;
+      color: #000000;
+      padding: 14px 28px;
+      margin: 10px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:hover {
+      background-color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+  </style>
 </head>
 <body>
-  <div id="navbar"></div>
+  <h1>EXPENSE MANAGER</h1>
+  <p>"Track wisely. Save smartly."</p>
+  <a href="login.html" class="btn">Login</a>
+  <a href="register.html" class="btn">Register</a>
 
-  <h1>Expense Manager</h1>
-
-  <div class="form">
-    <h2>Register</h2>
-    <input type="text" id="reg-username" placeholder="Username">
-    <input type="password" id="reg-password" placeholder="Password">
-    <button onclick="register()">Register</button>
-  </div>
-
-  <div class="form">
-    <h2>Login</h2>
-    <input type="text" id="login-username" placeholder="Username">
-    <input type="password" id="login-password" placeholder="Password">
-    <button onclick="login()">Login</button>
-  </div>
-
-  <script src="script.js"></script>
-<script>
-  fetch("navbar.html")
-    .then(res => res.text())
-    .then(html => document.getElementById("navbar").innerHTML = html);
-</script>
-
+  <script>
+    // ✅ Redirect to dashboard if already logged in
+    if (localStorage.getItem("username")) {
+      location.href = "dashboard.html";
+    }
+  </script>
 </body>
 </html>

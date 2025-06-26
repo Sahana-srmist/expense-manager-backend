@@ -58,21 +58,13 @@ async function addExpense() {
   const token = localStorage.getItem("auth");
   const username = localStorage.getItem("username");
 
-  console.log("Sending date:", date);
-  console.log("Sending username:", username);
-
   const res = await fetch(`${BASE_URL}/add`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: "Basic " + token
     },
-    body: JSON.stringify({
-      username: username,
-      reason: reason,
-      amount: amount,
-      date: date
-    })
+    body: JSON.stringify({ username, reason, amount, date })
   });
 
   if (res.ok) {
@@ -141,10 +133,11 @@ async function getSummary() {
     let html = `
       <p><strong>Total:</strong> ₹${data.total_expense}</p>
       <p><strong>Average:</strong> ₹${data.average_expense}</p>
-      <p><strong>Highest:</strong> ₹${data.highest_expense}</p>
-      <p><strong>Lowest:</strong> ₹${data.lowest_expense}</p>
+      <p><strong>Highest:</strong> ₹${data.highest_expense} on ${data.highest_date}</p>
+      <p><strong>Lowest:</strong> ₹${data.lowest_expense} on ${data.lowest_date}</p>
       <p><strong>Records:</strong> ${data.records}</p>
     `;
+
     document.getElementById("output").innerHTML = html;
   } else {
     document.getElementById("output").innerText = "Unable to fetch summary.";
@@ -156,7 +149,15 @@ async function getMonthlySummary() {
   const month = document.getElementById("month").value;
   const year = document.getElementById("year").value;
 
-  const res = await fetch(`${BASE_URL}/summary/monthly?month=${month}&year=${year}`, {
+  const monthNum = parseInt(month);
+  const yearNum = parseInt(year);
+
+  if (!month || !year || isNaN(monthNum) || isNaN(yearNum) || monthNum < 1 || monthNum > 12 || yearNum < 1000 || yearNum > 9999) {
+    alert("Please enter a valid month (1–12) and a valid 4-digit year.");
+    return;
+  }
+
+  const res = await fetch(`${BASE_URL}/summary/monthly?month=${monthNum}&year=${yearNum}`, {
     headers: { Authorization: "Basic " + token }
   });
 
@@ -172,12 +173,12 @@ async function getMonthlySummary() {
     `;
     document.getElementById("output").innerHTML = html;
   } else {
-    document.getElementById("output").innerText = "No summary found for this month.";
+    const err = await res.json();
+    document.getElementById("output").innerText = "Error: " + err.detail;
   }
 }
 
 function downloadCSV() {
-  const token = localStorage.getItem("auth");
   const username = localStorage.getItem("username");
   const url = `${BASE_URL}/export/csv`;
 
@@ -189,7 +190,6 @@ function downloadCSV() {
 }
 
 function downloadChart() {
-  const token = localStorage.getItem("auth");
   const username = localStorage.getItem("username");
   const url = `${BASE_URL}/export/bar-chart`;
 
@@ -206,9 +206,7 @@ async function deleteExpense() {
 
   const res = await fetch(`${BASE_URL}/delete/?reason=${reason}`, {
     method: "DELETE",
-    headers: {
-      Authorization: "Basic " + token
-    }
+    headers: { Authorization: "Basic " + token }
   });
 
   if (res.ok) {
@@ -220,22 +218,11 @@ async function deleteExpense() {
   }
 }
 
-function logout() {
-  localStorage.removeItem("auth");
-  localStorage.removeItem("username");
-  alert("You have been logged out.");
-  location.href = "login.html";
-}
-
-// Used by navbar.html to show "Login" or "Logout" on the top-right
 function updateAuthButton() {
   const btn = document.getElementById("auth-button");
   const username = localStorage.getItem("username");
-
-  if (username) {
-    btn.textContent = "Logout";
-  } else {
-    btn.textContent = "Login";
+  if (btn) {
+    btn.textContent = username ? "Logout" : "Login";
   }
 }
 
@@ -243,10 +230,87 @@ function handleAuth() {
   const username = localStorage.getItem("username");
   if (username) {
     localStorage.clear();
-    location.href = "login.html";
+    alert("You have been logged out.");
+    location.href = "index.html"; // ✅ Now redirects to homepage
   } else {
     location.href = "login.html";
   }
 }
 
+function createTable(data) {
+  if (data.length === 0) {
+    document.getElementById("output").innerText = "No data found.";
+    return;
+  }
+
+  let html = "<table border='1' style='margin: 20px auto; border-collapse: collapse;'>";
+  html += "<tr><th>Reason</th><th>Amount</th><th>Date</th></tr>";
+
+  data.forEach(item => {
+    html += `
+      <tr>
+        <td>${item.reason}</td>
+        <td>₹${item.amount}</td>
+        <td>${item.date}</td>
+      </tr>
+    `;
+  });
+
+  html += "</table>";
+  document.getElementById("output").innerHTML = html;
+}
+
+// ✅ Initialize when script loads
 updateAuthButton();
+
+function capitalizeName(name) {
+  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
+
+function updateNavbar() {
+  const username = localStorage.getItem("username");
+  const authBtn = document.getElementById("auth-button");
+  const userInfo = document.getElementById("user-info");
+  const path = window.location.pathname;
+
+  if (username) {
+    // Logged in
+    authBtn.textContent = "Logout";
+    authBtn.onclick = () => {
+      localStorage.clear();
+      alert("You have been logged out.");
+      location.href = "index.html";
+    };
+    if (userInfo) {
+      userInfo.style.display = "block";
+      document.getElementById("nav-username").textContent = capitalizeName(username);
+    }
+  } else {
+    // Not logged in
+    if (userInfo) userInfo.style.display = "none";
+
+    if (path.includes("login.html")) {
+      authBtn.textContent = "Go to Register";
+      authBtn.onclick = () => location.href = "register.html";
+    } else if (path.includes("register.html")) {
+      authBtn.textContent = "Go to Login";
+      authBtn.onclick = () => location.href = "login.html";
+    } else {
+      authBtn.textContent = "Login";
+      authBtn.onclick = () => location.href = "login.html";
+    }
+  }
+}
+
+function handleAuth() {
+  const username = localStorage.getItem("username");
+  if (username) {
+    localStorage.clear();
+    alert("You have been logged out.");
+    location.href = "index.html";
+  } else {
+    location.href = "login.html";
+  }
+}
+// ✅ Call this on every page to update the navbar
+window.addEventListener("DOMContentLoaded", updateNavbar);

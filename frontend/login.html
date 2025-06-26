@@ -1,35 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Login - Expense Manager</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f1ee;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px 40px;
+      max-width: 400px;
+      margin: 100px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .login-container h2 {
+      margin-bottom: 25px;
+      font-size: 26px;
+      color: #4e342e;
+    }
+
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: #795548;
+      outline: none;
+      box-shadow: 0 0 5px rgba(121, 85, 72, 0.5);
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #795548;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #5d4037;
+    }
+  </style>
 </head>
-<div id="navbar"></div>
-
-<script>
-  fetch("navbar.html")
-    .then(res => res.text())
-    .then(data => document.getElementById("navbar").innerHTML = data);
-</script>
-
 <body>
-
-  <!-- Include Navbar -->
   <div id="navbar"></div>
 
-  <div class="form">
+  <div class="login-container">
     <h2>Login</h2>
-    <input type="text" id="login-username" placeholder="Username" required>
-    <input type="password" id="login-password" placeholder="Password" required>
+    <input type="text" id="login-username" placeholder="Username" />
+    <input type="password" id="login-password" placeholder="Password" />
     <button onclick="login()">Login</button>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
+
+
+
   <script>
-    fetch("navbar.html")
-      .then(res => res.text())
-      .then(data => document.getElementById("navbar").innerHTML = data);
-  </script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("navbar").innerHTML = html;
+
+      const waitForNavbar = setInterval(() => {
+        if (document.getElementById("auth-button")) {
+          updateNavbar(); // ✅ same as in register.html
+          clearInterval(waitForNavbar);
+        }
+      }, 50);
+    });
+</script>
+
+
 
 </body>
 </html>
