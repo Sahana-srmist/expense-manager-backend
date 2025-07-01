@@ -68,13 +68,13 @@
 
   <script src="script.js"></script>
   <script>
-    // 🔐 Redirect to login if not logged in
+    // Redirect to login if not logged in
     const isLoggedIn = localStorage.getItem("username");
     if (!isLoggedIn) {
       location.href = "login.html";
     }
 
-    // ✅ Load navbar after script.js
+    // Load navbar after script.js
     fetch("navbar.html")
       .then(res => res.text())
       .then(html => {

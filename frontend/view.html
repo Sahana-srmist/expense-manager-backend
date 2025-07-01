@@ -81,7 +81,7 @@
 <script>
   const isLoggedIn = localStorage.getItem("username");
   if (!isLoggedIn) {
-    location.href = "login.html"; // ✅ fixed: redirect only if not logged in
+    location.href = "login.html"; // fixed: redirect only if not logged in
   }
 
   fetch("navbar.html")

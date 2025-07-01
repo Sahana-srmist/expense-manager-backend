@@ -62,11 +62,26 @@
       background-color: #6d4c41;
       transform: translateY(-2px);
     }
+
+    #loader {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #999;
+      z-index: 9999;
+    }
   </style>
 </head>
 
 <body>
   <div id="navbar"></div>
+
+  <div id="loader"><strong>Loading...</strong></div>
 
   <div class="dashboard-wrapper">
     <div class="welcome-card">
@@ -75,39 +90,74 @@
 
       <div class="button-grid">
         <button onclick="location.href='add.html'">Add Expense</button>
-        <button onclick="location.href='view.html'">View/Search Expenses</button>
         <button onclick="location.href='summary.html'">Summary & Export</button>
-        <button onclick="location.href='delete.html'">Delete Expense</button>
+        <button onclick="toggleSearch('reason')">Search by Reason</button>
+        <button onclick="toggleSearch('date')">Search by Date</button>
       </div>
+    </div>
+
+    <div id="search-box" style="margin: 5px 0 10px 0; text-align: center;">
+      <div id="reason-search" style="display: none;">
+        <input type="text" id="search-reason" placeholder="Enter reason..." />
+        <button onclick="searchByReason()">Search</button>
+      </div>
+
+      <div id="date-search" style="display: none;">
+        <input type="date" id="search-date" />
+        <button onclick="searchByDate()">Search</button>
+      </div>
+
+      <div id="reset-section" style="margin-top: 10px; display: none;">
+        <button onclick="loadExpenses()">Reset</button>
+      </div>
+    </div>
+
+    <div style="margin-top: 10px; width: 90%; max-width: 800px;">
+      <table id="expense-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #6d4c41; color: white;">
+          <tr>
+            <th style="padding: 10px;">Date</th>
+            <th style="padding: 10px;">Reason</th>
+            <th style="padding: 10px;">Amount (₹)</th>
+            <th style="padding: 10px;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="expense-body" style="background: #fff;">
+          <!-- JS populates here -->
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <script src="script.js"></script>
+    <script src="script.js"></script>
+
   <script>
     const username = localStorage.getItem("username");
+    const authToken = localStorage.getItem("auth");
 
-    if (!username) {
-      location.href = "login.html"; // 🔐 Redirect to login if not logged in
+    if (!username || !authToken) {
+      location.href = "login.html";
     } else {
       const capName = username.charAt(0).toUpperCase() + username.slice(1).toLowerCase();
       document.getElementById("user-name").textContent = capName;
     }
 
     fetch("navbar.html")
-  .then(res => res.text())
-  .then(html => {
-    document.getElementById("navbar").innerHTML = html;
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar").innerHTML = html;
 
-    // ✅ Wait until DOM has loaded the inserted navbar
-    const interval = setInterval(() => {
-      const authBtn = document.getElementById("auth-button");
-      if (authBtn && typeof updateNavbar === "function") {
-        updateNavbar("app");
-        clearInterval(interval);
-      }
-    }, 50);
-  });
+        const interval = setInterval(() => {
+          const authBtn = document.getElementById("auth-button");
+          if (authBtn && typeof updateNavbar === "function") {
+            updateNavbar("app");
+            clearInterval(interval);
+          }
+        }, 50);
+      });
 
+    window.onload = loadExpenses;
   </script>
+
 </body>
 </html>

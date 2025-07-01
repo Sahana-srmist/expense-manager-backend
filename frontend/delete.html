@@ -96,7 +96,7 @@
         const interval = setInterval(() => {
           const authBtn = document.getElementById("auth-button");
           if (authBtn && typeof updateNavbar === "function") {
-            updateNavbar("app"); // ✅ App mode: only Logout shown
+            updateNavbar("app"); //  App mode: only Logout shown
             clearInterval(interval);
           }
         }, 50);

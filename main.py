@@ -215,6 +215,25 @@ def delete_by_reason(reason: str, current_user: str = Depends(get_current_user))
     conn.close()
     return {"message": f"Deleted all expenses for reason: {reason}"}
 
+@app.delete("/delete/sno/{sno}", response_model=dict)
+def delete_by_sno(sno: int, current_user: str = Depends(get_current_user)):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Ensure the expense belongs to the current user
+    cur.execute("SELECT * FROM expenses WHERE sno = %s AND username = %s", (sno, current_user))
+    result = cur.fetchone()
+    if not result:
+        cur.close()
+        conn.close()
+        raise HTTPException(status_code=404, detail="Expense not found or does not belong to user.")
+
+    cur.execute("DELETE FROM expenses WHERE sno = %s", (sno,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"message": f"Deleted expense with sno: {sno}"}
+
 
 @app.get("/summary", response_model=dict)
 def get_summary(current_user: str = Depends(get_current_user)):
@@ -325,6 +344,10 @@ def export_csv(current_user: str = Depends(get_current_user)):
     return response
 
 #Bar Chart Export
+from fastapi.responses import StreamingResponse
+import matplotlib.pyplot as plt
+from io import BytesIO
+
 @app.get("/export/bar-chart")
 def export_bar_chart(current_user: str = Depends(get_current_user)):
     conn = get_db_connection()
@@ -357,9 +380,11 @@ def export_bar_chart(current_user: str = Depends(get_current_user)):
     for bar, amt in zip(bars, amounts):
         plt.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"₹{amt:.2f}", ha='center', va='bottom', fontsize=8)
 
-    filename = f"{current_user}_expenses_bar_chart.png"
-    filepath = f"./{filename}"
-    plt.savefig(filepath)
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
     plt.close()
+    buf.seek(0)
 
-    return FileResponse(path=filepath, filename=filename, media_type="image/png")
+    return StreamingResponse(buf, media_type="image/png")
+
+

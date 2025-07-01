@@ -1,5 +1,6 @@
 const BASE_URL = "http://127.0.0.1:8000";
 
+// ------------------------ AUTH ------------------------
 async function register() {
   const username = document.getElementById("reg-username").value;
   const password = document.getElementById("reg-password").value;
@@ -50,6 +51,18 @@ async function login() {
   }
 }
 
+function handleAuth() {
+  const username = localStorage.getItem("username");
+  if (username) {
+    localStorage.clear();
+    alert("You have been logged out.");
+    location.href = "index.html";
+  } else {
+    location.href = "login.html";
+  }
+}
+
+// ------------------------ EXPENSE ACTIONS ------------------------
 async function addExpense() {
   const reason = document.getElementById("reason").value;
   const amount = parseFloat(document.getElementById("amount").value);
@@ -78,50 +91,92 @@ async function addExpense() {
   }
 }
 
-async function getAllExpenses() {
-  const token = localStorage.getItem("auth");
-  const res = await fetch(`${BASE_URL}/expenses`, {
-    headers: { Authorization: "Basic " + token }
-  });
+async function deleteBySno(sno) {
+  if (!confirm(`Are you sure you want to delete this expense?`)) return;
 
-  if (res.ok) {
+  showLoader();
+  const token = localStorage.getItem("auth");
+
+  try {
+    const res = await fetch(`${BASE_URL}/delete/sno/${sno}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: "Basic " + token
+      }
+    });
+
+    const msg = await res.json();
+    alert(msg.message);
+    loadExpenses();
+  } catch (err) {
+    alert("Failed: " + err.message);
+  } finally {
+    hideLoader();
+  }
+}
+
+// ------------------------ FILTER / SEARCH ------------------------
+async function loadExpenses() {
+  showLoader();
+  const token = localStorage.getItem("auth");
+
+  try {
+    const res = await fetch(`${BASE_URL}/expenses`, {
+      headers: { Authorization: "Basic " + token }
+    });
+
     const data = await res.json();
     createTable(data);
-  } else {
-    document.getElementById("output").innerText = "No expenses found.";
+    document.getElementById("reset-section").style.display = "none";
+  } catch (err) {
+    document.getElementById("expense-body").innerHTML = `
+      <tr><td colspan="4" style="text-align:center; padding: 10px; color:red;">Failed to load data</td></tr>`;
+  } finally {
+    hideLoader();
   }
 }
 
 async function searchByReason() {
+  showLoader();
   const token = localStorage.getItem("auth");
   const reason = document.getElementById("search-reason").value;
-  const res = await fetch(`${BASE_URL}/search/?reason=${reason}`, {
-    headers: { Authorization: "Basic " + token }
-  });
 
-  if (res.ok) {
+  try {
+    const res = await fetch(`${BASE_URL}/search/?reason=${reason}`, {
+      headers: { Authorization: "Basic " + token }
+    });
+
     const data = await res.json();
     createTable(data);
-  } else {
-    document.getElementById("output").innerText = "No matching expenses.";
+    document.getElementById("reset-section").style.display = "block";
+  } catch {
+    alert("Error searching by reason");
+  } finally {
+    hideLoader();
   }
 }
 
 async function searchByDate() {
+  showLoader();
   const token = localStorage.getItem("auth");
   const date = document.getElementById("search-date").value;
-  const res = await fetch(`${BASE_URL}/search/date?date=${date}`, {
-    headers: { Authorization: "Basic " + token }
-  });
 
-  if (res.ok) {
+  try {
+    const res = await fetch(`${BASE_URL}/search/date?date=${date}`, {
+      headers: { Authorization: "Basic " + token }
+    });
+
     const data = await res.json();
     createTable(data);
-  } else {
-    document.getElementById("output").innerText = "No expenses on this date.";
+    document.getElementById("reset-section").style.display = "block";
+  } catch {
+    alert("Error searching by date");
+  } finally {
+    hideLoader();
   }
 }
 
+// ------------------------ SUMMARY ------------------------
 async function getSummary() {
   const token = localStorage.getItem("auth");
   const res = await fetch(`${BASE_URL}/summary`, {
@@ -137,47 +192,16 @@ async function getSummary() {
       <p><strong>Lowest:</strong> ₹${data.lowest_expense} on ${data.lowest_date}</p>
       <p><strong>Records:</strong> ${data.records}</p>
     `;
-
-    document.getElementById("output").innerHTML = html;
+    const outputDiv = document.getElementById("output");
+    if (outputDiv) outputDiv.innerHTML = html;
   } else {
-    document.getElementById("output").innerText = "Unable to fetch summary.";
+    const outputDiv = document.getElementById("output");
+    if (outputDiv) outputDiv.innerText = "Unable to fetch summary.";
   }
 }
 
-async function getMonthlySummary() {
-  const token = localStorage.getItem("auth");
-  const month = document.getElementById("month").value;
-  const year = document.getElementById("year").value;
 
-  const monthNum = parseInt(month);
-  const yearNum = parseInt(year);
-
-  if (!month || !year || isNaN(monthNum) || isNaN(yearNum) || monthNum < 1 || monthNum > 12 || yearNum < 1000 || yearNum > 9999) {
-    alert("Please enter a valid month (1–12) and a valid 4-digit year.");
-    return;
-  }
-
-  const res = await fetch(`${BASE_URL}/summary/monthly?month=${monthNum}&year=${yearNum}`, {
-    headers: { Authorization: "Basic " + token }
-  });
-
-  if (res.ok) {
-    const data = await res.json();
-    let html = `
-      <p><strong>Month:</strong> ${data.month}</p>
-      <p><strong>Total:</strong> ₹${data.total}</p>
-      <p><strong>Average:</strong> ₹${data.average}</p>
-      <p><strong>Highest:</strong> ₹${data.highest}</p>
-      <p><strong>Lowest:</strong> ₹${data.lowest}</p>
-      <p><strong>Count:</strong> ${data.count}</p>
-    `;
-    document.getElementById("output").innerHTML = html;
-  } else {
-    const err = await res.json();
-    document.getElementById("output").innerText = "Error: " + err.detail;
-  }
-}
-
+// ------------------------ EXPORT ------------------------
 function downloadCSV() {
   const username = localStorage.getItem("username");
   const url = `${BASE_URL}/export/csv`;
@@ -189,17 +213,7 @@ function downloadCSV() {
   a.click();
 }
 
-function downloadChart() {
-  const username = localStorage.getItem("username");
-  const url = `${BASE_URL}/export/bar-chart`;
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${username}_expenses_bar_chart.png`;
-  a.setAttribute("target", "_blank");
-  a.click();
-}
-
+// ------------------------ DELETE BY REASON ------------------------
 async function deleteExpense() {
   const token = localStorage.getItem("auth");
   const reason = document.getElementById("del-reason").value;
@@ -218,6 +232,35 @@ async function deleteExpense() {
   }
 }
 
+// ------------------------ UI HELPERS ------------------------
+function createTable(data) {
+  const tbody = document.getElementById("expense-body");
+  tbody.innerHTML = "";
+
+  if (!Array.isArray(data) || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 10px;">No data found.</td></tr>`;
+    return;
+  }
+
+  data.forEach(exp => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${exp.date}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">${exp.reason}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">₹${exp.amount}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+        <button onclick="deleteBySno(${exp.sno})" style="background-color: #795548; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">
+          Delete
+        </button>
+      </td>`;
+    tbody.appendChild(row);
+  });
+}
+
+function capitalizeName(name) {
+  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
+
 function updateAuthButton() {
   const btn = document.getElementById("auth-button");
   const username = localStorage.getItem("username");
@@ -226,91 +269,128 @@ function updateAuthButton() {
   }
 }
 
-function handleAuth() {
-  const username = localStorage.getItem("username");
-  if (username) {
-    localStorage.clear();
-    alert("You have been logged out.");
-    location.href = "index.html"; // ✅ Now redirects to homepage
-  } else {
-    location.href = "login.html";
+function updateNavbar() {
+  try {
+    const username = localStorage.getItem("username");
+    const authBtn = document.getElementById("auth-button");
+    const userInfo = document.getElementById("user-info");
+
+    if (!authBtn) return; // navbar not ready yet
+
+    const path = window.location.pathname;
+
+    if (username) {
+      authBtn.textContent = "Logout";
+      authBtn.onclick = handleAuth;
+
+      if (userInfo) {
+        userInfo.style.display = "block";
+        const navUser = document.getElementById("nav-username");
+        if (navUser) navUser.textContent = capitalizeName(username);
+      }
+    } else {
+      if (userInfo) userInfo.style.display = "none";
+
+      if (path.includes("login.html")) {
+        authBtn.textContent = "Go to Register";
+        authBtn.onclick = () => location.href = "register.html";
+      } else if (path.includes("register.html")) {
+        authBtn.textContent = "Go to Login";
+        authBtn.onclick = () => location.href = "login.html";
+      } else {
+        authBtn.textContent = "Login";
+        authBtn.onclick = () => location.href = "login.html";
+      }
+    }
+  } catch (err) {
+    console.warn("updateNavbar failed:", err);
   }
 }
 
-function createTable(data) {
-  if (data.length === 0) {
-    document.getElementById("output").innerText = "No data found.";
-    return;
+
+window.addEventListener("DOMContentLoaded", updateNavbar);
+
+function toggleSearch(type) {
+  const reasonBox = document.getElementById("reason-search");
+  const dateBox = document.getElementById("date-search");
+
+  if (type === "reason") {
+    reasonBox.style.display = "block";
+    dateBox.style.display = "none";
+  } else if (type === "date") {
+    reasonBox.style.display = "none";
+    dateBox.style.display = "block";
   }
+}
 
-  let html = "<table border='1' style='margin: 20px auto; border-collapse: collapse;'>";
-  html += "<tr><th>Reason</th><th>Amount</th><th>Date</th></tr>";
+//-------------------Show Bar Chart--------------//
 
-  data.forEach(item => {
-    html += `
-      <tr>
-        <td>${item.reason}</td>
-        <td>₹${item.amount}</td>
-        <td>${item.date}</td>
-      </tr>
-    `;
+async function showChart() {
+  console.log("showChart called");
+
+  const res = await fetch(`${BASE_URL}/export/bar-chart`, {
+    headers: { Authorization: "Basic " + localStorage.getItem("auth") }
   });
 
-  html += "</table>";
-  document.getElementById("output").innerHTML = html;
-}
+  console.log("response.ok?", res.ok);
 
-// ✅ Initialize when script loads
-updateAuthButton();
+  if (res.ok) {
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
 
-function capitalizeName(name) {
-  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-}
+    const chartContainer = document.getElementById("chart-container");
+    chartContainer.innerHTML = "";
 
-function updateNavbar() {
-  const username = localStorage.getItem("username");
-  const authBtn = document.getElementById("auth-button");
-  const userInfo = document.getElementById("user-info");
-  const path = window.location.pathname;
+    const img = document.createElement("img");
+    img.src = url;
+    img.id = "chart-image";
+    img.style.maxWidth = "90%";
+    img.style.display = "block";
 
-  if (username) {
-    // Logged in
-    authBtn.textContent = "Logout";
-    authBtn.onclick = () => {
-      localStorage.clear();
-      alert("You have been logged out.");
-      location.href = "index.html";
-    };
-    if (userInfo) {
-      userInfo.style.display = "block";
-      document.getElementById("nav-username").textContent = capitalizeName(username);
+    chartContainer.appendChild(img);
+    console.log("Chart appended");
+
+    // Enable download button here
+    const downloadBtn = document.getElementById("download-chart-btn");
+    if (downloadBtn) {
+      downloadBtn.style.display = "inline-block"; // Show the button
     }
   } else {
-    // Not logged in
-    if (userInfo) userInfo.style.display = "none";
-
-    if (path.includes("login.html")) {
-      authBtn.textContent = "Go to Register";
-      authBtn.onclick = () => location.href = "register.html";
-    } else if (path.includes("register.html")) {
-      authBtn.textContent = "Go to Login";
-      authBtn.onclick = () => location.href = "login.html";
-    } else {
-      authBtn.textContent = "Login";
-      authBtn.onclick = () => location.href = "login.html";
-    }
+    console.log("Chart fetch failed");
   }
 }
 
-function handleAuth() {
-  const username = localStorage.getItem("username");
-  if (username) {
-    localStorage.clear();
-    alert("You have been logged out.");
-    location.href = "index.html";
+
+function downloadChart() {
+  const chart = document.getElementById("chart-image");
+
+  if (chart) {
+    const link = document.createElement("a");
+    link.href = chart.src;
+    link.download = "expense_chart.png";
+    link.click();
   } else {
-    location.href = "login.html";
+    alert("Please click 'Show Bar Chart' first.");
   }
 }
-// ✅ Call this on every page to update the navbar
-window.addEventListener("DOMContentLoaded", updateNavbar);
+
+
+// ------------------------ Loading Spinner ------------------------
+function showLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "block";
+}
+
+function hideLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "none";
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const chartBtn = document.getElementById("chart-btn");
+  if (chartBtn) {
+    chartBtn.addEventListener("click", function (e) {
+      e.preventDefault();       // PREVENT RELOAD
+      showChart();              // CALL THE FUNCTION
+    });
+  }
+});

@@ -65,23 +65,32 @@
 <body>
   <div id="navbar"></div>
 
-  <div class="form-container">
-    <h2>Summary & Export</h2>
-    <button onclick="getSummary()">Get Overall Summary</button>
-    <input type="number" id="month" placeholder="Month (1-12)" />
-    <input type="number" id="year" placeholder="Year (e.g. 2025)" />
-    <button onclick="getMonthlySummary()">Monthly Summary</button>
-    <button onclick="downloadCSV()">Download CSV</button>
-    <button onclick="downloadChart()">Download Bar Chart</button>
-    <button onclick="location.href='dashboard.html'" style="background-color: #616161;">Back to Dashboard</button>
-    <div id="output"></div>
-  </div>
+<div class="form-container">
+  <h2>Summary & Export</h2>
 
-  <script src="script.js"></script>
+  <button onclick="getSummary()">Get Overall Summary</button>
+  <input type="number" id="month" placeholder="Month (1-12)" />
+  <input type="number" id="year" placeholder="Year (e.g. 2025)" />
+  <button onclick="getMonthlySummary()">Monthly Summary</button>
+  <button onclick="downloadCSV()">Download CSV</button>
+  <button id="chart-btn" type="button">Show Bar Chart</button>
+
+
+  <div id="chart-container" style="margin-top: 20px; text-align: center;"></div>
+
+  <div id="output"></div> <!-- Corrected placement -->
+  <button id="download-chart-btn" onclick="downloadChart()" style="display: none;">Download Chart</button>
+
+  <button onclick="location.href='dashboard.html'" style="background-color: #616161;">Back to Dashboard</button>
+</div>
+
+
+  
+<script src="script.js"></script>
 <script>
   const isLoggedIn = localStorage.getItem("username");
   if (!isLoggedIn) {
-    location.href = "login.html"; // ✅ FIXED: Only redirect if not logged in
+    location.href = "login.html";
   }
 
   fetch("navbar.html")
@@ -89,19 +98,24 @@
     .then(html => {
       document.getElementById("navbar").innerHTML = html;
 
-      // 🧠 Wait until navbar is inserted in DOM
       const interval = setInterval(() => {
         const authBtn = document.getElementById("auth-button");
-        if (authBtn && typeof updateNavbar === "function") {
-          updateNavbar("app");
+        const chartBtn = document.getElementById("chart-btn");
+
+        if (authBtn && chartBtn && typeof updateNavbar === "function") {
+          updateNavbar();
+
+          // Attach the click event here
+          chartBtn.addEventListener("click", () => {
+            console.log("showChart button clicked");
+            showChart();
+          });
+
           clearInterval(interval);
         }
-      }, 50);
+      }, 100);
     });
 </script>
-
-
-
 
 </body>
 </html>

@@ -71,9 +71,11 @@ button:hover {
   position: relative;
   z-index: 100;
 }
+
 .dashboard-box h2 {
   color: #333 !important;  /* This overrides the global yellow */
 }
+
 .navbar a {
   color: white;
   text-decoration: none;
@@ -108,4 +110,10 @@ button:hover {
     padding: 20px;
     width: 90%;
   }
+}
+
+#output {
+  color: white;
+  text-align: center;
+  margin-top: 20px;
 }
