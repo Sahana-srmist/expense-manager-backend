@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://expense-manager-backend.onrender.com";
 
 // ------------------------ AUTH ------------------------
 async function register() {
