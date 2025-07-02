@@ -72,19 +72,21 @@ def root():
 @app.post("/register")
 def register_user(username: str, password: str):
     print(f"📥 Register attempt: {username}")
-    conn = get_db_connection()
-    cur = conn.cursor()
     try:
         hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+
+        conn = get_db_connection()
+        cur = conn.cursor()
         cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed.decode()))
         conn.commit()
-        return {"message": "User registered successfully!"}
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail="Username already exists.")
-    finally:
         cur.close()
         conn.close()
+
+        return {"message": "User registered successfully!"}
+    except Exception as e:
+        print("❌ Registration error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
     
 
 @app.post("/login")
