@@ -1,4 +1,4 @@
-const BASE_URL = "https://expense-manager-backend.onrender.com";
+const BASE_URL = "https://expense-manager-backend-1-laxl.onrender.com";
 
 // ------------------------ AUTH ------------------------
 async function register() {
