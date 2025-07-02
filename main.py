@@ -23,6 +23,7 @@ app = FastAPI(
     description="Track and manage expenses with user authentication.",
     version="1.0.0"
 )
+print("🔐 CORS is active: allowing frontend origin")
 
 app.add_middleware(
     CORSMiddleware,
@@ -70,6 +71,7 @@ def root():
 
 @app.post("/register")
 def register_user(username: str, password: str):
+    print(f"📥 Register attempt: {username}")
     conn = get_db_connection()
     cur = conn.cursor()
     try:
