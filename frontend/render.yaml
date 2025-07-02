@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: expense-manager-app
+    env: python
+    buildCommand: ""
+    startCommand: ./start.sh
+    envVars:
+      - key: DATABASE_URL
+        value: "postgresql://expense_manager_db_avqk_user:7RquhCtGwJeC5q1GySmzYsPxVhWcZQSn@dpg-d1hmvcbuibrs73fgtivg-a/expense_manager_db_avqk"
