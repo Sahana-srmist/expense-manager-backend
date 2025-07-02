@@ -33,7 +33,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+@app.get("/init-db")
+def init_db():
+    try:
+        conn = psycopg2.connect("postgresql://expense_manager_db_avqk_user:<y7RquhCtGwJeC5q1GySmzYsPxVhWcZQSn>@dpg-d1hmvcbuibrs73fgtivg-a/expense_manager_db_avqk")
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            )
+        """)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return {"message": "Users table created successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+        
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     try:
         conn = get_db_connection()
