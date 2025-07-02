@@ -1,10 +1,13 @@
 import psycopg2
+import os
+from urllib.parse import urlparse
+
+import os
+import psycopg2
 
 def get_db_connection():
-    return psycopg2.connect(
-        dbname="expense manager final",
-        user="postgres",
-        password="Sahana@2006",  # In real app, use env variables
-        host="localhost",
-        port="5432"
-    )
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        raise Exception("DATABASE_URL not set in environment variables.")
+    return psycopg2.connect(db_url)
+
