@@ -25,9 +25,10 @@ app = FastAPI(
 )
 print("🔐 CORS is active: allowing frontend origin")
 
+# ✅ Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://expense-manager-frontend-z5pn.onrender.com"],  # ✅ Only your frontend
+    allow_origins=["https://expense-manager-frontend-z5pn.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
