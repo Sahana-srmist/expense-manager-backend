@@ -26,11 +26,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://expense-manager-frontend-z5pn.onrender.com"],  # ✅ Only your frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     try:
