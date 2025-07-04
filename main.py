@@ -15,8 +15,12 @@ import bcrypt #password hashing
 from fastapi.responses import FileResponse 
 import matplotlib.pyplot as plt #bar chart
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI
+from database import get_db_connection
 
 security = HTTPBasic()
+
+print("🚀 FastAPI is initializing...")
 
 app = FastAPI(
     title="EXPENSE MANAGER",          # appears in swagger UI
@@ -25,7 +29,6 @@ app = FastAPI(
 )
 print("🔐 CORS is active: allowing frontend origin")
 
-# ✅ Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://expense-manager-frontend-z5pn.onrender.com"],
@@ -33,11 +36,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-from fastapi import FastAPI
-from database import get_db_connection
-
-app = FastAPI()
 
 @app.get("/init-db")
 def init_db():
@@ -52,7 +50,7 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
-    return {"message": "✅ Users table created successfully"}
+    return {"message": "Users table created successfully"}
 
         
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
